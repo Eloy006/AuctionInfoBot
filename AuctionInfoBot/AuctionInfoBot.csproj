@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\CommandParser\CommandTools.csproj" />
+    <ProjectReference Include="..\NoSqlTorgiGovRu\NoSqlTorgiGovRu.csproj" />
+    <ProjectReference Include="..\TorgiGovRu_Bot\TorgiGovRu_Bot.csproj" />
+    <ProjectReference Include="..\WebXmlLoader\WebXmlLoader.csproj" />
+  </ItemGroup>
+
+</Project>
