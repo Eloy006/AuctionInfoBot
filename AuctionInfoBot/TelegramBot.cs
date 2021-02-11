@@ -2,9 +2,12 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
+using CommandTools;
+using NoSqlTorgiGovRu;
 using Telegram.Bot;
 using Telegram.Bot.Exceptions;
 using Telegram.Bot.Extensions.Polling;
@@ -13,16 +16,17 @@ using Telegram.Bot.Types.Enums;
 using Telegram.Bot.Types.InlineQueryResults;
 using Telegram.Bot.Types.InputFiles;
 using Telegram.Bot.Types.ReplyMarkups;
-using TradeInformationBot.XsdClasses.TorgiGovRu;
+using TorgiGovRu_Bot;
 
 
 namespace TradeInformationBot
 {
-    class Program
+    public class TradeBot:IDisposable
     {
         private static TelegramBotClient Bot;
         private static readonly string BotToken = "1654340584:AAF-bKl5HKvWblYRTADEuMdJAAclqK72L1g";
-        public static async Task Main()
+        private CancellationTokenSource BotCancellationToken;
+        public async Task Start()
         {
 
 #if USE_PROXY
@@ -35,174 +39,95 @@ namespace TradeInformationBot
             var me = await Bot.GetMeAsync();
             Console.Title = me.Username;
 
-            var cts = new CancellationTokenSource();
+            BotCancellationToken = new CancellationTokenSource();
 
             // StartReceiving does not block the caller thread. Receiving is done on the ThreadPool.
             Bot.StartReceiving(
                 new DefaultUpdateHandler(HandleUpdateAsync, HandleErrorAsync),
-                cts.Token
+                BotCancellationToken.Token
             );
 
-            Console.WriteLine($"Start listening for @{me.Username}");
-            Console.ReadLine();
-
-            // Send cancellation request to stop bot
-            cts.Cancel();
         }
 
         static async Task SendText(long chatId,string text)
         {
+            
             await Bot.SendTextMessageAsync(
                 chatId: chatId,
                 text: text);
         }
 
-        
-        
-        public static  void LoadOdDetail(openDataNotification openDataNotification,string cadastrNum)
+        static async Task SendTextReplay(long chatId,int messageId, string text)
         {
-
-
-            XmlClient xmlClient=new XmlClient();
-
-
-            var notifications =  xmlClient.GetObjectFromXml<fullNotification>(openDataNotification.odDetailedHref);
-            openDataNotification.NotificationGround = notifications;
-          
-        }
-
-        public static void LoadOdDetailSafe(openDataNotification openDataNotification, string cadastrNum)
-        {
-            int countRun = 5;
-            
-
-            while (true)
-            {
-                try
-                {
-                    LoadOdDetail(openDataNotification, cadastrNum);
-                    return;
-                }
-                catch
-                {
-
-                    Task.Delay(5000);
-
-                }
-
-                if (--countRun == 0)
-                {
-
-                    break;
-                    
-                }
-            }
-
-            
-        }
-
-        static async Task FindCadastre(Message message,IEnumerable<string> cadastreArgs)
-        {
-            await Bot.SendChatActionAsync(message.Chat.Id, ChatAction.Typing);
-            
-            var publishDataFromString= cadastreArgs.FirstOrDefault(x => !string.IsNullOrEmpty(x)) ?? "";
-            var cadastrenumber = cadastreArgs.FirstOrDefault(x => !string.IsNullOrEmpty(x)) ?? "";
-            if (!DateTime.TryParse(publishDataFromString, out var publishDataFrom))
-            {
-                publishDataFrom = DateTime.Now.AddDays(-1);
-            }
-            else
-            {
-                cadastrenumber=cadastreArgs.Skip(1).FirstOrDefault(x => !string.IsNullOrEmpty(x)) ?? "";
-            }
-            
-
-            
-
-
-            if(cadastrenumber!=null) cadastrenumber= Regex.Replace(cadastrenumber, @"\r\n?|\n", "");
-            //await SendText(message.Chat.Id, cadastrenumber);
-            XmlClient client=new XmlClient();
-            publishDataFromString = publishDataFrom.ToString("yyyyMMddTHHmmss"); //Regex.Replace(publishDataFrom.ToString("s"), @"-?:?", "");
-            var uriCall =
-                $"https://torgi.gov.ru/opendata/7710349494-torgi/data.xml?bidKind=2&publishDateFrom={publishDataFromString}";
-           var ret= client.GetObjectFromXml<openData>(uriCall).notification.Where(x=>x.organizationName.Contains("КАМЫШИН", StringComparison.InvariantCultureIgnoreCase)) ;
-
-           if (!ret.Any())
-           {
-               await SendText(message.Chat.Id, "Обьекты не найдены");
-               return;
-            }
-
-            Parallel.ForEach(ret, new ParallelOptions(){MaxDegreeOfParallelism = 2}, (openData)=>
-                LoadOdDetailSafe(openData, cadastrenumber));
-
-            
-           var items=ret.Where(x => 
-               x.NotificationGround.notification.lot.Any(x=>x.cadastralNum!=null && x.cadastralNum.Contains(cadastrenumber,StringComparison.InvariantCultureIgnoreCase)));
-
-           if (!items.Any())
-           {
-               await SendText(message.Chat.Id, "Обьекты не найдены");
-               return;
-           }
-
-           if (string.IsNullOrEmpty(cadastrenumber))
-           {
-
-               foreach (var item in items)
-               {
-                   await SendText(message.Chat.Id,
-                       
-                       string.Join(Environment.NewLine,item.NotificationGround.notification.lot.Select(x=> $"{x.cadastralNum}\r\n{x.description}\r\n{x.area}\r\n{x.location}")));
-                   
-
-               }
-               return;
-            }
-
-
-           foreach (var item in items)
-           {
-               await SendText(message.Chat.Id, 
-                   item.NotificationGround.notification.common.notificationUrl + "\r\n" + string.Join(Environment.NewLine, item.NotificationGround.notification.documents.Select(x => x.docUrl + "\r\n")));
-               
-
-           }
-
-
+            await Bot.SendTextMessageAsync(
+                chatId: chatId,
+                replyToMessageId:messageId,
+                text: text
+                
+                );
         }
 
 
+        public List<fullNotification> FindCadastr(string command)
+        {
 
-        static async Task FindRequest(Message message)
+           
+            CommandParser commandParser = new CommandParser();
+
+            var parseData = commandParser.ParseCommand(BotCommandTask.CadastrCommands,
+                command);
+            using (var notification = new FullNotificationModel())
+            {
+                var findNotifications= notification.FindByСadastralNubmer(parseData[nameof(BotCommandTask.CadastrCommand.cadastr)]).ToList();
+                return findNotifications;
+
+
+            }
+
+        }
+
+        private async Task FindRequest(Message message,string command)
         {
             await Bot.SendChatActionAsync(message.Chat.Id, ChatAction.Typing);
 
-            // Simulate longer running task
-            await Task.Delay(500);
+            
 
-            var arguments=message.Text.Split(' ').Skip(1);
-
-            if (!arguments.Any())
+            if (!command.Any())
             {
                 await SendText(
                     message.Chat.Id,
                     text: "Синтаксис\r\n" +
-                          "Поиск по кадастру /find cadastre 44:22233:222213"
+                          "Поиск по кадастру 44:22233:222213"
                 );
                 return;
                 
             }
 
-            switch (arguments.First())
+            var ret=await Task.Run<List<fullNotification>>(() => FindCadastr(command));
+            if (!ret.Any())
             {
-                case "cadastre":
-                    await FindCadastre(message, arguments.Skip(1));
-                    break;
-                case "address":
-                    break;
+                SendText(message.Chat.Id, "не найден");
+                return;
+            }
+            
+            foreach (var item in ret)
+            {
+
+               var lot= string.Join(Environment.NewLine,
+                    item.notification.lot.Select(x =>
+                        $"Кадастровый номер: {x.cadastralNum}{Environment.NewLine}" +
+                        $"Площадь: {x.area*0.01} сот.{Environment.NewLine}" +
+                        $"Местоположение: {x.location}{Environment.NewLine}"
                     
+                        ));
+
+                
+                var sbBuilder = GetCommonText(item);
+
+
+                var url= item.notification.common.notificationUrl;
+
+            await SendTextReplay(message.Chat.Id, message.MessageId, $"{lot}{Environment.NewLine}{sbBuilder}{Environment.NewLine}{url}");
 
 
             }
@@ -211,17 +136,81 @@ namespace TradeInformationBot
 
         }
 
-        private static async Task BotOnMessageReceived(Message message)
+        private static StringBuilder GetCommonText(fullNotification item)
+        {
+            var sbBuilder = new StringBuilder();
+            if (DateTime.TryParse(item.notification.common.startDateRequest, out var startDateRequest))
+            {
+                sbBuilder.AppendLine(
+                    $"Дата и время начала приема заявок: {startDateRequest:dd.MM.yyyy hh:mm}");
+            }
+
+            if (DateTime.TryParse(item.notification.common.expireDate, out var expireDate))
+            {
+                sbBuilder.AppendLine($"Дата и время окончания приема заявок: {expireDate:dd.MM.yyyy hh:mm}");
+            }
+
+
+            if (DateTime.TryParse(item.notification.common.bidAuctionDate, out var bidAuctionDate))
+            {
+                sbBuilder.AppendLine($"Дата и время проведения аукциона: {bidAuctionDate:dd.MM.yyyy hh:mm}");
+            }
+
+            return sbBuilder;
+        }
+
+
+        public class MessageCommand
+        {
+            public string message { get; set; }
+            public string command { get; set; }
+
+            public MessageCommand(string message, string command)
+            {
+                this.message = message;
+                this.command = command;
+            }
+
+        }
+
+        private List<MessageCommand> MessageCommands=new List<MessageCommand>()
+        {
+            new MessageCommand("найти кадастровый номер","find cadastr"),
+            new MessageCommand("найти","find cadastr"),
+            new MessageCommand("оповестить кадастр","shedulle cadastr"),
+
+        } ;
+
+        
+
+        private string СonvertMessageToCommand(string message)
+        {
+            var toConvert= MessageCommands.OrderByDescending(x=>x.message.Length);
+            
+            foreach (var command in toConvert)
+            {
+                message=message.Replace(command.message, command.command);
+
+            }
+
+            return message;
+        }
+
+
+        private  async Task BotOnMessageReceived(Message message)
         {
             Console.WriteLine($"Receive message type: {message.Type}");
             if (message.Type != MessageType.Text)
                 return;
+            
+            var textMessage = СonvertMessageToCommand(message.Text);
 
-            var action = (message.Text.Split(' ').First()) switch
+            var action = (textMessage.Split(' ').First()) switch
             {
-                "/platform" => SendInlineKeyboard(message),
-                "/keyboard" => SendReplyKeyboard(message),
-                "/find" => FindRequest(message),
+                
+                "platform" => SendInlineKeyboard(message),
+                "keyboard" => SendReplyKeyboard(message),
+                "find" => FindRequest(message, textMessage),
 
             };
             await action;
@@ -277,7 +266,7 @@ namespace TradeInformationBot
             }
         }
 
-        public static async Task HandleUpdateAsync(ITelegramBotClient botClient, Update update, CancellationToken cancellationToken)
+        public  async Task HandleUpdateAsync(ITelegramBotClient botClient, Update update, CancellationToken cancellationToken)
         {
             var handler = update.Type switch
             {
@@ -318,6 +307,11 @@ namespace TradeInformationBot
             };
 
             Console.WriteLine(ErrorMessage);
+        }
+
+        public void Dispose()
+        {
+            BotCancellationToken.Cancel();
         }
     }
 }

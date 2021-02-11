@@ -6,6 +6,7 @@ using CommandTools;
 using NoSqlTorgiGovRu;
 using TorgiConsole;
 using TorgiGovRu_Bot;
+using TradeInformationBot;
 using WebXmlLoader;
 
 
@@ -34,28 +35,19 @@ namespace AuctionInfoBot
 
             while (true)
             {
-                var loadPartial = shedullerLoad.PartialLoad(500);
+                var loadPartial = shedullerLoad.PartialLoad(100);
                 current += loadPartial;
                 Console.Write($"\r{current} to {total}");
                 if (loadPartial == 0) break;
-                Thread.Sleep(5000);
+                Thread.Sleep(100);
 
             }
 
-            
+            TradeBot tradeBot=new TradeBot();
+            tradeBot.Start();
 
-            
-            CommandParser commandParser = new CommandParser();
 
-            var parseData = commandParser.ParseCommand(BotCommandTask.CadastrCommands,
-                "region \"камышин\" \"волгоград\" cadastr 10:15:0070102:177 69:24:0094601:350 20:17:0151001:411 publishdate 02.02.2020");
-            using (var notification =new FullNotificationModel())
-            {
-                var fcadastr = notification.FindByСadastralNubmer(parseData[nameof(BotCommandTask.CadastrCommand.cadastr)]);
-                var retDefault = fcadastr.ToArray();
-            }
-            
-           
+
 
             Console.WriteLine("Hello World!");
             Console.ReadLine();

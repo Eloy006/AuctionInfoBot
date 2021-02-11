@@ -3,15 +3,17 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.30523.141
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AuctionInfoBot", "AuctionInfoBot\AuctionInfoBot.csproj", "{7F938EDC-57C9-435F-BA8D-BF894CCF9AEE}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AuctionInfoBot", "AuctionInfoBot\AuctionInfoBot.csproj", "{7F938EDC-57C9-435F-BA8D-BF894CCF9AEE}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CommandTools", "CommandParser\CommandTools.csproj", "{E51F6F23-5781-4643-8E83-638D9F7C3796}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CommandTools", "CommandParser\CommandTools.csproj", "{E51F6F23-5781-4643-8E83-638D9F7C3796}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NoSqlTorgiGovRu", "NoSqlTorgiGovRu\NoSqlTorgiGovRu.csproj", "{C2FD093F-CC4D-4F39-90A4-AA12AF2E70C0}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebXmlLoader", "WebXmlLoader\WebXmlLoader.csproj", "{0A27C588-BA1C-4105-AF92-804FA1624CFC}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TorgiGovRu_Bot", "TorgiGovRu_Bot\TorgiGovRu_Bot.csproj", "{E13C233A-AF17-43F9-A5BC-674825823443}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BotSheduller", "BotSheduller\BotSheduller.csproj", "{0E218770-BED2-434F-9FF3-D87C4950B61B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -39,6 +41,10 @@ Global
 		{E13C233A-AF17-43F9-A5BC-674825823443}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E13C233A-AF17-43F9-A5BC-674825823443}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E13C233A-AF17-43F9-A5BC-674825823443}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0E218770-BED2-434F-9FF3-D87C4950B61B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0E218770-BED2-434F-9FF3-D87C4950B61B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0E218770-BED2-434F-9FF3-D87C4950B61B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0E218770-BED2-434F-9FF3-D87C4950B61B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

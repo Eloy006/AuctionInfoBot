@@ -6,6 +6,11 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Telegram.Bot" Version="15.7.1" />
+    <PackageReference Include="Telegram.Bot.Extensions.Polling" Version="0.2.0" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\CommandParser\CommandTools.csproj" />
     <ProjectReference Include="..\NoSqlTorgiGovRu\NoSqlTorgiGovRu.csproj" />
     <ProjectReference Include="..\TorgiGovRu_Bot\TorgiGovRu_Bot.csproj" />
