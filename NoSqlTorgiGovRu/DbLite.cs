@@ -16,6 +16,7 @@ namespace NoSqlTorgiGovRu
             _dbLite = new LiteDatabase(DEF_CONNECTION_STRING);
         }
 
+ 
         public void Dispose()
         {
             _dbLite?.Dispose();

@@ -57,7 +57,7 @@ namespace TorgiConsole
                     {
                         var loadedData = LoadOdData(x);
                         if(loadedData!=null)
-                        paralelLoaded.Add(loadedData);
+                            paralelLoaded.Add(loadedData);
                     }
                 );
 

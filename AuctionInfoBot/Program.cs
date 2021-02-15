@@ -16,33 +16,10 @@ namespace AuctionInfoBot
     {
         static async Task Main(string[] args)
         {
+            UpdateSheduller updateSheduller=new UpdateSheduller();
 
-            var xmlLoader = new XmlLoader();
-
-            var dataX = await xmlLoader.LoadFromUrlAsync<openData>(
-                "https://torgi.gov.ru/opendata/7710349494-torgi/data.xml?bidKind=2&publishDateFrom=20210101T0000");
-            var total = 0;
-            using (var openData = new OpenDataNotificationModel())
-            { 
-                openData.Update(dataX.notification);
-                total = openData.GetNotificationCount(false);
-            }
-
-            var shedullerLoad = new ShedullerLoad();
-
+            Task.Factory.StartNew(() => updateSheduller.UpdateTask());
             
-            var current = 0;
-
-            while (true)
-            {
-                var loadPartial = shedullerLoad.PartialLoad(100);
-                current += loadPartial;
-                Console.Write($"\r{current} to {total}");
-                if (loadPartial == 0) break;
-                Thread.Sleep(100);
-
-            }
-
             TradeBot tradeBot=new TradeBot();
             tradeBot.Start();
 

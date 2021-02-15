@@ -199,7 +199,10 @@ namespace TradeInformationBot
 
         private  async Task BotOnMessageReceived(Message message)
         {
+            if(message==null) return;
+
             Console.WriteLine($"Receive message type: {message.Type}");
+
             if (message.Type != MessageType.Text)
                 return;
             
@@ -211,6 +214,7 @@ namespace TradeInformationBot
                 "platform" => SendInlineKeyboard(message),
                 "keyboard" => SendReplyKeyboard(message),
                 "find" => FindRequest(message, textMessage),
+                _=>SendText(message.Chat.Id,"Команда не найдена")
 
             };
             await action;
