@@ -6,9 +6,9 @@ using LiteDB;
 
 namespace NoSqlTorgiGovRu
 {
-    public class OpenDataNotificationModel:DbLite
+    public class OpenDataNotificationModel:DbLite<openDataNotification>
     {
-        private string DataSetName => "openData";
+        public override string DataSetName => "openData";
 
         public openDataNotification ChangeId(openDataNotification oldOpenData, openDataNotification newOpenData, bool ReLoadNotification)
         {
@@ -31,7 +31,12 @@ namespace NoSqlTorgiGovRu
             return col.Find(x => x.NotificationLoaded == false).Take(count).ToArray();
         }
 
-        public bool Update(IEnumerable<openDataNotification> items,bool updateLastChange = true)
+        public override bool Update(IEnumerable<openDataNotification> model)
+        {
+            return Update(model,true);
+        }
+
+        public override bool Update(IEnumerable<openDataNotification> items,bool updateLastChange = true)
         {
             var col = _dbLite.GetCollection<openDataNotification>(DataSetName);
 
@@ -67,10 +72,11 @@ namespace NoSqlTorgiGovRu
                                                             && x.bidKindId == dataOpen.bidKindId)).ToList();
         }
 
-        private static void CreateIndex(ILiteCollection<openDataNotification> col)
+        protected override bool CreateIndex(ILiteCollection<openDataNotification> col)
         {
-            col.EnsureIndex("openDateIndex", "[$.bidKindId, $.bidNumber, $.bidKindId]");
-            col.EnsureIndex(x => x.NotificationLoaded);
+            var indexCreator=col.EnsureIndex("openDateIndex", "[$.bidKindId, $.bidNumber, $.bidKindId]");
+            indexCreator&=col.EnsureIndex(x => x.NotificationLoaded);
+            return indexCreator;
         }
     }
 }

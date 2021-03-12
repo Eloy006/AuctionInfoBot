@@ -4,29 +4,47 @@ using LiteDB;
 
 namespace NoSqlTorgiGovRu
 {
-    public class FullNotificationModel : DbLite
+    public class FullNotificationModel : DbLite<fullNotification>
     {
-        private string DataSetName => "NotificationGround";
+        public const string CollectionName = "NotificationGround";
+        public override string DataSetName => CollectionName;
 
-        public IEnumerable<fullNotification> FindByСadastralNubmer(string[] cadastrNum)
+        public fullNotificationNotificationLot[] CreateRefNotificationLot(fullNotification notification)
         {
-            var col = _dbLite.GetCollection<fullNotification>(DataSetName);
-            return col.FindAll().Where(x => x.notification.lot.Any(lot => cadastrNum.Contains(lot.cadastralNum)));
-            
+            foreach (var lot in notification.notification.lot)
+            {
+                lot.fullNotification = notification;
+            }
+
+            return notification.notification.lot;
         }
 
-        public bool Update(IEnumerable<fullNotification> items)
+        public override bool Update(IEnumerable<fullNotification> items)
         {
             var col = _dbLite.GetCollection<fullNotification>(DataSetName);
+            
             CreateIndex(col);
             
             var finder = col.FindAll().ToArray();
             var inserts = GetDataToInsert(items, finder);
             var updates = GetDataToUpdate(items, finder);
+
+            var updatesLot = updates.Where(x => x.notification?.lot != null)
+                .SelectMany(CreateRefNotificationLot).ToList();
+            updatesLot.AddRange(inserts.Where(x => x.notification?.lot != null)
+                .SelectMany(CreateRefNotificationLot));
+            
+            var lotModel =new NotificationLotModel();
+            lotModel.Update(updatesLot);
             
             var cnUpdates = col.Update(updates);
             var cnInserts = col.InsertBulk(inserts);
             return cnUpdates == updates.Count && cnInserts == inserts.Count;
+        }
+
+        public override bool Update(IEnumerable<fullNotification> model, bool forceUpdate)
+        {
+            return Update(model);
         }
 
         private static List<fullNotification> GetDataToUpdate(IEnumerable<fullNotification> items,
@@ -47,12 +65,9 @@ namespace NoSqlTorgiGovRu
                 .ToList();
         }
 
-        private static void CreateIndex(ILiteCollection<fullNotification> col)
+        protected override bool CreateIndex(ILiteCollection<fullNotification> col)
         {
-            col.EnsureIndex(x => x.notification.bidNumber);
-            //col.EnsureIndex(x => x.notification.lot[0].cadastralNum);
-            //col.EnsureIndex("$.notification.lot[*].cadastralNum");
-            //col.EnsureIndex("IDX_CADASTRNUM1","JOIN(MAP($.notification.lot[*]=>@.cadastralNum),' ')");
+            return col.EnsureIndex(x => x.notification.bidNumber);
         }
     }
 }

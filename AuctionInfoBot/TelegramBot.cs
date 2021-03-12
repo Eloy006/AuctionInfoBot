@@ -68,7 +68,7 @@ namespace TradeInformationBot
         }
 
 
-        public List<fullNotification> FindCadastr(string command)
+        public List<fullNotificationNotificationLot> FindCadastr(string command)
         {
 
            
@@ -76,8 +76,9 @@ namespace TradeInformationBot
 
             var parseData = commandParser.ParseCommand(BotCommandTask.CadastrCommands,
                 command);
-            using (var notification = new FullNotificationModel())
+            using (var notification = new NotificationLotModel())
             {
+
                 var findNotifications= notification.FindByСadastralNubmer(parseData[nameof(BotCommandTask.CadastrCommand.cadastr)]).ToList();
                 return findNotifications;
 
@@ -103,7 +104,7 @@ namespace TradeInformationBot
                 
             }
 
-            var ret=await Task.Run<List<fullNotification>>(() => FindCadastr(command));
+            var ret=await Task.Run(() => FindCadastr(command));
             if (!ret.Any())
             {
                 SendText(message.Chat.Id, "не найден");
@@ -114,18 +115,18 @@ namespace TradeInformationBot
             {
 
                var lot= string.Join(Environment.NewLine,
-                    item.notification.lot.Select(x =>
-                        $"Кадастровый номер: {x.cadastralNum}{Environment.NewLine}" +
-                        $"Площадь: {x.area*0.01} сот.{Environment.NewLine}" +
-                        $"Местоположение: {x.location}{Environment.NewLine}"
                     
-                        ));
+                        $"Кадастровый номер: {item.cadastralNum}{Environment.NewLine}" +
+                        $"Площадь: {item.area*0.01} сот.{Environment.NewLine}" +
+                        $"Местоположение: {item.location}{Environment.NewLine}"
+                    
+                        );
 
                 
-                var sbBuilder = GetCommonText(item);
+                var sbBuilder = GetCommonText(item.fullNotification);
 
 
-                var url= item.notification.common.notificationUrl;
+                var url= item.fullNotification.notification.common.notificationUrl;
 
             await SendTextReplay(message.Chat.Id, message.MessageId, $"{lot}{Environment.NewLine}{sbBuilder}{Environment.NewLine}{url}");
 

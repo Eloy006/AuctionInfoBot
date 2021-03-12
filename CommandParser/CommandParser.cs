@@ -22,7 +22,7 @@ namespace CommandTools
 
         public Dictionary<string, string[]> ParseCommand(string [] commands,string args)
         {
-            return ParseCommand(commands, args.Split(' '));
+            return ParseCommand(commands, args.Split(' ').Where(x=>!string.IsNullOrEmpty(x)).ToArray());
         }
 
 

@@ -12,6 +12,7 @@
 // Этот исходный код был создан с помощью xsd, версия=4.8.3928.0.
 // 
 namespace NoSqlTorgiGovRu {
+    using LiteDB;
     using System.Xml.Serialization;
     
     
@@ -66,6 +67,7 @@ namespace NoSqlTorgiGovRu {
         
         private fullNotificationNotificationDoc[] documentsField;
         
+       
         private fullNotificationNotificationLot[] lotField;
         
         /// <remarks/>
@@ -108,8 +110,9 @@ namespace NoSqlTorgiGovRu {
                 this.documentsField = value;
             }
         }
-        
+
         /// <remarks/>
+        [BsonRef(NotificationLotModel.CollectionName)]
         [System.Xml.Serialization.XmlElementAttribute("lot")]
         public fullNotificationNotificationLot[] lot {
             get {

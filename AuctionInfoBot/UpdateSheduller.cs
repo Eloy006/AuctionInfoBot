@@ -17,38 +17,46 @@ namespace AuctionInfoBot
         {
             while (true)
             {
-                Console.WriteLine("Begin load data");
-
-                var xmlLoader = new XmlLoader();
-
-                var dataX = await xmlLoader.LoadFromUrlAsync<openData>(
-                    "https://torgi.gov.ru/opendata/7710349494-torgi/data.xml?bidKind=2&publishDateFrom=20200901T0000");
-                var total = 0;
-                using (var openData = new OpenDataNotificationModel())
+                try
                 {
-                    openData.Update(dataX.notification);
-                    total = openData.GetNotificationCount(false);
+                    Console.WriteLine("Begin load data");
+
+                    var xmlLoader = new XmlLoader();
+
+                    var dataX = await xmlLoader.LoadFromUrlAsync<openData>(
+                        "https://torgi.gov.ru/opendata/7710349494-torgi/data.xml?bidKind=2&publishDateFrom=20210301T0000");
+                    var total = 0;
+                    using (var openData = new OpenDataNotificationModel())
+                    {
+                        openData.Update(dataX.notification);
+                        total = openData.GetNotificationCount(false);
+                    }
+
+                    var shedullerLoad = new ShedullerLoad();
+
+
+                    var current = 0;
+
+                    Stopwatch stopwatch = new Stopwatch();
+                    stopwatch.Start();
+                    while (true)
+                    {
+                        var loadPartial = shedullerLoad.PartialLoad(100);
+                        current += loadPartial;
+                        Console.Write($"\r{current} to {total}");
+                        if (loadPartial == 0) break;
+                        await Task.Delay(1000);
+                    }
+
+                    stopwatch.Stop();
+
+                    Console.WriteLine("End load data");
+                    await Task.Delay(1000 * 20 * 60);
                 }
-
-                var shedullerLoad = new ShedullerLoad();
-
-
-                var current = 0;
-                
-                Stopwatch stopwatch=new Stopwatch();
-                stopwatch.Start();
-                while (true)
+                catch (Exception _ex)
                 {
-                    var loadPartial = shedullerLoad.PartialLoad(100);
-                    current += loadPartial;
-                    Console.Write($"\r{current} to {total}");
-                    if (loadPartial == 0) break;
-                    await Task.Delay(1000);
+                    await Task.Delay(10000);
                 }
-                stopwatch.Stop();
-
-                Console.WriteLine("End load data");
-                await Task.Delay(1000 * 20*60);
             }
         }
     }
