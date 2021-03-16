@@ -11,7 +11,7 @@ namespace NoSqlTorgiGovRu
         public const string CollectionName = "NotificationLots";
         public override string DataSetName => CollectionName;
 
-        public IEnumerable<fullNotificationNotificationLot> FindByСadastralNubmer(string[] cadastrNum)
+        public IEnumerable<fullNotificationNotificationLot> FindByСadastralNum(string[] cadastrNum)
         {
             var col = _dbLite.GetCollection<fullNotificationNotificationLot>(DataSetName);
 

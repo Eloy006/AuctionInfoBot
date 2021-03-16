@@ -80,7 +80,7 @@ namespace TradeInformationBot
             using (var notification = new NotificationLotModel())
             {
 
-                var findNotifications= notification.FindByСadastralNubmer(parseData[nameof(BotCommandTask.CadastrCommand.cadastr)]).ToList();
+                var findNotifications= notification.FindByСadastralNum(parseData[nameof(BotCommandTask.CadastrCommand.cadastr)]).ToList();
                 return findNotifications;
 
 
