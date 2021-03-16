@@ -76,6 +76,7 @@ namespace TradeInformationBot
 
             var parseData = commandParser.ParseCommand(BotCommandTask.CadastrCommands,
                 command);
+            if (parseData.Count == 0) return new List<fullNotificationNotificationLot>();
             using (var notification = new NotificationLotModel())
             {
 

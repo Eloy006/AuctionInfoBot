@@ -10,7 +10,7 @@ namespace NoSqlTorgiGovRu
     public abstract class DbLite<T>:IDisposable
     {
         
-        private  string DEF_CONNECTION_STRING => @"Filename=Soyuz.db; Connection=shared";
+        private  string DEF_CONNECTION_STRING => @"Filename=AuctionBotData.db; Connection=shared";
         protected LiteDatabase _dbLite;
 
         public abstract bool Update(IEnumerable<T> model);
