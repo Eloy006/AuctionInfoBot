@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace TorgiGovRu_Bot
+﻿namespace TorgiGovRu_Bot
 {
     public class BotCommandTask
     {

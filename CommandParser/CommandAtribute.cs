@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace CommandTools
+﻿namespace CommandTools
 {
     public class CommandParserAttribute:System.Attribute { }
 }

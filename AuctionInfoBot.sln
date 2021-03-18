@@ -13,8 +13,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebXmlLoader", "WebXmlLoade
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TorgiGovRu_Bot", "TorgiGovRu_Bot\TorgiGovRu_Bot.csproj", "{E13C233A-AF17-43F9-A5BC-674825823443}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BotSheduller", "BotSheduller\BotSheduller.csproj", "{0E218770-BED2-434F-9FF3-D87C4950B61B}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -41,10 +39,6 @@ Global
 		{E13C233A-AF17-43F9-A5BC-674825823443}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E13C233A-AF17-43F9-A5BC-674825823443}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E13C233A-AF17-43F9-A5BC-674825823443}.Release|Any CPU.Build.0 = Release|Any CPU
-		{0E218770-BED2-434F-9FF3-D87C4950B61B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{0E218770-BED2-434F-9FF3-D87C4950B61B}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{0E218770-BED2-434F-9FF3-D87C4950B61B}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{0E218770-BED2-434F-9FF3-D87C4950B61B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
