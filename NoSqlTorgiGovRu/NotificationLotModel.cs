@@ -26,9 +26,15 @@ namespace NoSqlTorgiGovRu
             }
 
             return col.Include(x=>x.fullNotification).Find(x => cadastrNum.Contains(x.cadastralNum)).ToArray();
-
-
         }
+
+        public IEnumerable<fullNotificationNotificationLot> FindByRegistrationNumber(string regNumber)
+        {
+            var col = _dbLite.GetCollection<fullNotificationNotificationLot>(DataSetName);
+            var result= col.Include(x => x.fullNotification).Find(x => x.cadastralNum.StartsWith(regNumber,StringComparison.CurrentCultureIgnoreCase)).ToArray();
+            return result;
+        }
+
 
 
         private void UpdateLot(ILiteCollection<fullNotificationNotificationLot> col, fullNotificationNotificationLot oldLot,fullNotificationNotificationLot updateLot)

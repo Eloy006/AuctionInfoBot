@@ -77,16 +77,39 @@ namespace TradeInformationBot
             var parseData = commandParser.ParseCommand(BotCommandTask.CadastrCommands,
                 command);
             if (parseData.Count == 0) return new List<fullNotificationNotificationLot>();
-            using (var notification = new NotificationLotModel())
+
+            if (parseData.ContainsKey(nameof(BotCommandTask.CadastrCommand.cadastr)))
             {
+                using (var notification = new NotificationLotModel())
+                {
 
-                var findNotifications= notification.FindByСadastralNum(parseData[nameof(BotCommandTask.CadastrCommand.cadastr)]).ToList();
-                return findNotifications;
+                    var findNotifications = notification
+                        .FindByСadastralNum(parseData[nameof(BotCommandTask.CadastrCommand.cadastr)]).ToList();
+                    return findNotifications;
 
 
+                }
             }
 
+            if (parseData.ContainsKey(nameof(BotCommandTask.CadastrCommand.region)))
+            {
+                using (var notification = new NotificationLotModel())
+                {
+
+                    var findNotifications = notification
+                        .FindByRegistrationNumber(parseData[nameof(BotCommandTask.CadastrCommand.region)].FirstOrDefault()).ToList();
+                    return findNotifications;
+
+
+                }
+            }
+
+            return new List<fullNotificationNotificationLot>();
+
         }
+
+
+        //FindByRegistrationNumber
 
         private async Task FindRequest(Message message,string command)
         {
@@ -115,13 +138,14 @@ namespace TradeInformationBot
             foreach (var item in ret)
             {
 
-               var lot= string.Join(Environment.NewLine,
-                    
-                        $"Кадастровый номер: {item.cadastralNum}{Environment.NewLine}" +
-                        $"Площадь: {item.area*0.01} сот.{Environment.NewLine}" +
-                        $"Местоположение: {item.location}{Environment.NewLine}"
-                    
-                        );
+                var lot = new StringBuilder();
+                lot.AppendLine();
+                lot.AppendLine($"Кадастровый номер: {item.cadastralNum}");
+                lot.AppendLine($"Площадь: {(item.area*0.01):0,0} сот.  {item.area:0,0}кв. м.");
+                lot.AppendLine($"Местоположение: {item.location}");
+                lot.AppendLine($"Цена: {item.startPrice:0,0.00}р.");
+
+            
 
                 
                 var sbBuilder = GetCommonText(item.fullNotification);
@@ -179,6 +203,7 @@ namespace TradeInformationBot
         {
             new MessageCommand("найти кадастровый номер","find cadastr"),
             new MessageCommand("найти","find cadastr"),
+            new MessageCommand("регион","find region"),
             new MessageCommand("оповестить кадастр","shedulle cadastr"),
 
         } ;
@@ -188,12 +213,15 @@ namespace TradeInformationBot
         private string СonvertMessageToCommand(string message)
         {
             var toConvert= MessageCommands.OrderByDescending(x=>x.message.Length);
-            
+            var oldMessage = message;
             foreach (var command in toConvert)
             {
                 message=message.Replace(command.message, command.command);
 
             }
+
+            //if (oldMessage == message) message = $"find cadastr {message}";
+            
 
             return message;
         }

@@ -24,7 +24,7 @@ namespace AuctionInfoBot
                     var xmlLoader = new XmlLoader();
 
                     var dataX = await xmlLoader.LoadFromUrlAsync<openData>(
-                        "https://torgi.gov.ru/opendata/7710349494-torgi/data.xml?bidKind=2&publishDateFrom=20210101T0000");
+                        "https://torgi.gov.ru/opendata/7710349494-torgi/data.xml?bidKind=2&publishDateFrom=20201101T0000");
                     var total = 0;
                     using (var openData = new OpenDataNotificationModel())
                     {
