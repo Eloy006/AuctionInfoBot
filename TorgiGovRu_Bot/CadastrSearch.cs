@@ -11,10 +11,12 @@ namespace TorgiGovRu_Bot
         {
             cadastr, 
             region, 
-            publishdate
+            publishdate,
+            regionof,
+
         }
         
-        public static string[] CadastrCommands = new[] { nameof(CadastrCommand.cadastr), nameof(CadastrCommand.region), nameof(CadastrCommand.publishdate) };
+        public static string[] CadastrCommands = new[] { nameof(CadastrCommand.cadastr), nameof(CadastrCommand.region), nameof(CadastrCommand.publishdate), nameof(CadastrCommand.regionof) };
 
         public string Guid { get; set; }
         public string chatId { get; set; }

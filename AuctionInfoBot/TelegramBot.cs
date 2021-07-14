@@ -7,6 +7,8 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using CommandTools;
+using Microsoft.VisualBasic;
+using Newtonsoft.Json;
 using NoSqlTorgiGovRu;
 using Telegram.Bot;
 using Telegram.Bot.Exceptions;
@@ -17,6 +19,7 @@ using Telegram.Bot.Types.InlineQueryResults;
 using Telegram.Bot.Types.InputFiles;
 using Telegram.Bot.Types.ReplyMarkups;
 using TorgiGovRu_Bot;
+using File = System.IO.File;
 
 
 namespace TradeInformationBot
@@ -57,13 +60,15 @@ namespace TradeInformationBot
                 text: text);
         }
 
-        static async Task SendTextReplay(long chatId,int messageId, string text)
+        static async Task SendTextReplay(long chatid,int messageId, string text)
         {
+          
             await Bot.SendTextMessageAsync(
-                chatId: chatId,
+                chatId: chatid,
                 replyToMessageId:messageId,
-                text: text
-                
+                text: text,
+                parseMode: ParseMode.Markdown
+
                 );
         }
 
@@ -98,6 +103,46 @@ namespace TradeInformationBot
 
                     var findNotifications = notification
                         .FindByRegistrationNumber(parseData[nameof(BotCommandTask.CadastrCommand.region)].FirstOrDefault()).ToList();
+                    return findNotifications;
+
+
+                }
+            }
+
+            if (parseData.ContainsKey(nameof(BotCommandTask.CadastrCommand.regionof)))
+            {
+
+
+                using (var notification = new NotificationLotModel())
+                {
+
+                    var parseDataList = parseData[nameof(BotCommandTask.CadastrCommand.regionof)];
+
+                    
+
+                    var param=parseDataList.Take(2).ToArray();
+
+                    var findNotifications = new List<fullNotificationNotificationLot>();
+
+
+                    if (int.TryParse(param[0],out var s) && (int.TryParse(param[1], out var t)))
+                    {
+                        var data = string.Join(' ', parseData[nameof(BotCommandTask.CadastrCommand.regionof)].Skip(2));
+
+
+
+
+
+
+                         findNotifications = notification
+                            .FindByRegionName(s, t, data).ToList();
+                    }
+                    else
+                    {
+                        var data = string.Join(' ', parseData[nameof(BotCommandTask.CadastrCommand.regionof)]);
+                        findNotifications = notification
+                            .FindByRegionName(0, 10, data).ToList();
+                    }
                     return findNotifications;
 
 
@@ -140,20 +185,24 @@ namespace TradeInformationBot
 
                 var lot = new StringBuilder();
                 lot.AppendLine();
-                lot.AppendLine($"Кадастровый номер: {item.cadastralNum}");
-                lot.AppendLine($"Площадь: {(item.area*0.01):0,0} сот.  {item.area:0,0}кв. м.");
-                lot.AppendLine($"Местоположение: {item.location}");
-                lot.AppendLine($"Цена: {item.startPrice:0,0.00}р.");
-
-            
-
+                lot.AppendLine($"*Кадастровый номер:* {item.cadastralNum}");
+                lot.AppendLine($"*Площадь:* {(item.area*0.01):F} сот.  {item.area:0,000}кв. м.");
+                lot.AppendLine($"*Местоположение:* {item.location}");
+                if(!string.IsNullOrWhiteSpace(item.mission)) lot.AppendLine($"*Назначение:* {item.mission}");
+                if(item.groundType!=null) lot.AppendLine($"*Категория земели:* {item.groundType.name}");
                 
+                lot.AppendLine($"*Цена:* {item.startPrice:F} Валюта: {item.currency}");
+                lot.AppendLine();
+            
                 var sbBuilder = GetCommonText(item.fullNotification);
 
 
-                var url= item.fullNotification.notification.common.notificationUrl;
+                sbBuilder.AppendLine();
 
-            await SendTextReplay(message.Chat.Id, message.MessageId, $"{lot}{Environment.NewLine}{sbBuilder}{Environment.NewLine}{url}");
+                sbBuilder.AppendLine(item.fullNotification.notification.common.notificationUrl);
+                lot.Append(sbBuilder);
+
+            await SendTextReplay(message.Chat.Id, message.MessageId, lot.ToString());
 
 
             }
@@ -168,18 +217,18 @@ namespace TradeInformationBot
             if (DateTime.TryParse(item.notification.common.startDateRequest, out var startDateRequest))
             {
                 sbBuilder.AppendLine(
-                    $"Дата и время начала приема заявок: {startDateRequest:dd.MM.yyyy hh:mm}");
+                    $"*Дата и время начала приема заявок:* {startDateRequest:dd.MM.yyyy hh:mm}");
             }
 
             if (DateTime.TryParse(item.notification.common.expireDate, out var expireDate))
             {
-                sbBuilder.AppendLine($"Дата и время окончания приема заявок: {expireDate:dd.MM.yyyy hh:mm}");
+                sbBuilder.AppendLine($"*Дата и время окончания приема заявок:* {expireDate:dd.MM.yyyy hh:mm}");
             }
 
 
             if (DateTime.TryParse(item.notification.common.bidAuctionDate, out var bidAuctionDate))
             {
-                sbBuilder.AppendLine($"Дата и время проведения аукциона: {bidAuctionDate:dd.MM.yyyy hh:mm}");
+                sbBuilder.AppendLine($"*Дата и время проведения аукциона:* {bidAuctionDate:dd.MM.yyyy hh:mm}");
             }
 
             return sbBuilder;
@@ -205,6 +254,7 @@ namespace TradeInformationBot
             new MessageCommand("найти","find cadastr"),
             new MessageCommand("регион","find region"),
             new MessageCommand("оповестить кадастр","shedulle cadastr"),
+            new MessageCommand("текст","find regionof")
 
         } ;
 
@@ -244,6 +294,7 @@ namespace TradeInformationBot
                 "platform" => SendInlineKeyboard(message),
                 "keyboard" => SendReplyKeyboard(message),
                 "find" => FindRequest(message, textMessage),
+                
                 _=>SendText(message.Chat.Id,"Команда не найдена")
 
             };

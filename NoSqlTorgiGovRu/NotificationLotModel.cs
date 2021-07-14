@@ -35,7 +35,15 @@ namespace NoSqlTorgiGovRu
             return result;
         }
 
+        public IEnumerable<fullNotificationNotificationLot> FindByRegionName(int start,int end,string regionName)
+        {
+            var col = _dbLite.GetCollection<fullNotificationNotificationLot>(DataSetName);
+            var result = col.Include(x => x.fullNotification).Find(x =>
+                x.location.Contains(regionName, StringComparison.CurrentCultureIgnoreCase),start,end);
+            
 
+            return result.ToArray();
+        }
 
         private void UpdateLot(ILiteCollection<fullNotificationNotificationLot> col, fullNotificationNotificationLot oldLot,fullNotificationNotificationLot updateLot)
         {
